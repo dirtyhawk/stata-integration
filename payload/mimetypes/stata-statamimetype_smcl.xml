@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+  <mime-type type="application/x-stata-smcl">
+		<comment>Stata SMCL file</comment>
+		<comment xml:lang="de">Stata SMCL-Datei</comment>
+		<glob pattern="*.smcl"/>
+		<glob pattern="*.sthlp"/>
+		<icon name="application-x-stata-smcl"/>
+  </mime-type>
+</mime-info>

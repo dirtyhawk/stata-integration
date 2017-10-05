@@ -1,0 +1,45 @@
+[Desktop Entry]
+Name=!!FLAVOUR!! !!VERSION!!
+Version=1.0
+GenericName=Stata
+Comment=Start !!FLAVOUR!! !!VERSION!! (GUI mode)
+Comment[de_DE]=!!FLAVOUR!! !!VERSION!! im Fenstermodus öffnen
+Exec=!!INSTALLPATH!!/!!WINDOWED!! -q
+Icon=application-x-stata-stata!!VERSION!!logo
+Terminal=false
+Type=Application
+MimeType=application/x-stata-dta;application/x-stata-do;application/x-stata-smcl;application/x-stata-stpr;application/x-stata-gph;application/x-stata-stsem;
+Categories=GTK;GNOME;Science;
+StartupNotify=true
+Actions=doedit;use;view;graphuse;projmanag;semopen;
+
+[Desktop Action doedit]
+Name=Start Stata and open do-file editor
+Name[de_DE]=Stata starten und do-file-Editor öffnen
+Exec=!!INSTALLPATH!!/!!WINDOWED!! -q doedit "%f"
+
+[Desktop Action use]
+Name=Start Stata and use file
+Name[de_DE]=Stata starten und Datei öffnen
+Exec=!!INSTALLPATH!!/!!WINDOWED!! -q use "%f"
+
+[Desktop Action view]
+Name=Start Stata and open viewer
+Name[de_DE]=Stata starten und Viewer öffnen
+Exec=!!INSTALLPATH!!/!!WINDOWED!! -q view "%f"
+
+[Desktop Action graphuse]
+Name=Start Stata and open graph editor
+Name[de_DE]=Stata starten und Grafik-Editor öffnen
+Exec=!!INSTALLPATH!!/!!WINDOWED!! -q graph use "%f"
+
+[Desktop Action semopen]
+Name=Start Stata and open structural equation model builder
+Name[de_DE]=Stata starten und SEM-Builder öffnen
+Exec=!!INSTALLPATH!!/!!WINDOWED!! -q sembuilder "%f"
+
+[Desktop Action projmanag]
+Name=Start Stata and open project manager
+Name[de_DE]=Stata starten und Projektmanager öffnen
+Exec=!!INSTALLPATH!!/!!WINDOWED!! -q projmanag "%f"
+

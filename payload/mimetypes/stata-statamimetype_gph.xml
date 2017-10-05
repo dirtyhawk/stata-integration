@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+  <mime-type type="application/x-stata-gph">
+		<comment>Stata graph file</comment>
+		<comment xml:lang="de">Stata Grafik</comment>
+		<glob pattern="*.gph"/>
+		<icon name="application-x-stata-gph"/>
+  </mime-type>
+</mime-info>

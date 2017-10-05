@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+  <mime-type type="application/x-stata-do">
+		<comment>Stata do/ado file</comment>
+		<comment xml:lang="de">Stata do/ado Datei</comment>
+		<glob pattern="*.do"/>
+		<glob pattern="*.ado"/>
+		<icon name="application-x-stata-do"/>
+  </mime-type>
+</mime-info>

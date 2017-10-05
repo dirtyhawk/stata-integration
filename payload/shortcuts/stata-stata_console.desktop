@@ -1,0 +1,27 @@
+[Desktop Entry]
+Name=!!FLAVOUR!! !!VERSION!! (console)
+Name[de_DE]=!!FLAVOUR!! !!VERSION!! (Kommandozeile)
+Version=1.0
+GenericName=Stata
+Comment=Start !!FLAVOUR!! !!VERSION!! in console mode
+Comment[de_DE]=!!FLAVOUR!! !!VERSION!! im Kommandozeilenmodus öffnen
+Exec=!!INSTALLPATH!!/!!CONSOLE!! -q
+Icon=application-x-stata-stata!!VERSION!!logo
+Terminal=true
+Type=Application
+MimeType=application/x-stata-dta;application/x-stata-do;
+Categories=GTK;GNOME;Science;
+StartupNotify=true
+Actions=doedit;use;
+
+[Desktop Action doedit]
+Name=Open Stata with do-file editor
+Name[de_DE]=Stata starten und do-file-Editor öffnen
+Exec=!!INSTALLPATH!!/!!CONSOLE!! -q doedit "%f"
+
+[Desktop Action use]
+Name=Open Stata and use file
+Name[de_DE]=Stata starten und Datei öffnen
+Exec=!!INSTALLPATH!!/!!CONSOLE!! -q use "%f"
+
+
