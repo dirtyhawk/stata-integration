@@ -4,7 +4,7 @@
 # into the system 
 ## Checking for root privileges
 SCRIPTNAME=$(basename "$0")
-if [ `id -u` != "0" ]; then
+if [ $(id -u) != "0" ]; then
         echo "\nERROR!\nYou need root-privileges to run this script!\nTry running 'sudo ${SCRIPTNAME}'.\nExiting '{$SCRIPTNAME}'."
         exit $EXIT_ERROR
 fi
