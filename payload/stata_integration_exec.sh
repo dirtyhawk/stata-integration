@@ -13,10 +13,18 @@ EXIT_FAILURE=3 # program error
 PAYLOADPATH=$(echo "$(dirname '$0')" | sed -e "s:^\.:$(pwd):")
 # DEFAULT STATA INSTALLATION PATH
 DEFAULTPATH='/usr/local/stata'
-# DOWNLOAD URL FOR LIBPNG
-LIBPNGURL="http://downloads.sourceforge.net/project/libpng/libpng16/older-releases/1.6.2/libpng-1.6.2.tar.gz"
+# EXACT VERSION NUMBER FOR LIBPNG 1.6
+LIBPNG16VERSION="1.6.2"
+# DOWNLOAD URL FOR LIBPNG 1.6
+LIBPNG16URL="https://downloads.sourceforge.net/project/libpng/libpng16/older-releases/${LIBPNG16VERSION}/libpng-${LIBPNG16VERSION}.tar.gz"
+# EXACT VERSION NUMBER FOR LIBPNG 1.2
+LIBPNG12VERSION="1.2.59"
+# DOWNLOAD URL FOR LIBPNG 1.2
+LIBPNG12URL="https://downloads.sourceforge.net/project/libpng/libpng12/${LIBPNG12VERSION}/libpng-${LIBPNG12VERSION}.tar.gz"
+# EXACT VERSION NUMBER FOR ZLIB 1.2
+ZLIB12VERSION="1.2.3"
 # DOWNLOAD URL FOR ZLIB
-ZLIBURL="http://downloads.sourceforge.net/project/libpng/zlib/1.2.3/zlib-1.2.3.tar.gz"
+ZLIB12URL="https://downloads.sourceforge.net/project/libpng/zlib/${ZLIB12VERSION}/zlib-${ZLIB12VERSION}.tar.gz"
 # MINIMUM AND MAXIMUM OF SUPPORTED STATA VERSIONS
 MINSUPPORTEDVERSION=11
 MAXSUPPORTEDVERSION=15
@@ -196,7 +204,7 @@ else
 fi
 ## query whether to apply the libpng/zlib to manually use older versions of the two named libraries
 if [ -z "${ARGLIBPNGFIX}" ] ; then
-	echo "\n(4) Stata relies on libpng version 1.6.2 and zlib 1.2.3. Modern Linux distributions feature newer versions of these libraries.\nThis leads to Stata not being able to display icons in its menu bars, but showing icons with question marks everywhere in the graphical user interface.\nYou should now have a look at your Stata installation; if you see normal icons in Stata's user interface, you're fine. If not, this script can try to work around this issue by\n\t(a) manually auto-downloading the old library variants,\n\t(b) building these libraries from source, and\n\t(c) telling Stata explicitly to use these manually saved variants instead of the system libraries.\n\nThis will erase the directory '${INSTALLPATH}/libpngworkaround/' and all its contents, if existing, without further notice.\n\nPlease specify whether you want the script to implement this workaround:"
+	echo "\n(4) Stata relies on libpng versions ${LIBPNG12VERSION} and ${LIBPNG16VERSION} as well as zlib version ${ZLIB12VERSION}. Modern Linux distributions feature newer versions of these libraries.\nThis leads to Stata not being able to display icons in its menu bars, but showing icons with question marks everywhere in the graphical user interface.\nYou should now have a look at your Stata installation; if you see normal icons in Stata's user interface, you're fine. If not, this script can try to work around this issue by\n\t(a) manually auto-downloading the old library variants,\n\t(b) building these libraries from source, and\n\t(c) telling Stata explicitly to use these manually saved variants instead of the system libraries.\n\nThis will erase the directory '${INSTALLPATH}/libpngworkaround/' and all its contents, if existing, without further notice.\n\nPlease specify whether you want the script to implement this workaround:"
 	read QUERIEDLIBPNGFIX
 	echo "\n"
 	case ${QUERIEDLIBPNGFIX} in
@@ -316,20 +324,26 @@ if [ "${LIBPNGFIX}" = "true" ]; then
 	CWD=$(pwd)
 	mkdir "${BUILDDIR}"
 	cd "${BUILDDIR}"
-	echo "\t...downloading zlib 1.2.3"
-	wget -q --show-progress ${ZLIBURL}
+	echo "\t...downloading zlib ${ZLIB12VERSION}"
+	wget -q --show-progress ${ZLIB12URL}
 	if [ $? != 0 ]; then
 		echo "\t...error downloading zlib, we can not continue; please check if you have internet access and try again" >&2
 		exit ${EXIT_FAILURE}
 	fi
-	echo "\t...downloading libpng 1.6.2"
-	wget -q --show-progress ${LIBPNGURL}
+	echo "\t...downloading libpng 1.2"
+	wget -q --show-progress ${LIBPNG12URL}
 	if [ $? != 0 ]; then
-		echo "\t...error downloading libpng, we can not continue; please check if you have internet access and try again" >&2
+		echo "\t...error downloading libpng 1.2, we can not continue; please check if you have internet access and try again" >&2
 		exit ${EXIT_FAILURE}
 	fi
-	echo "--- libpng-1.6.2/scripts/pnglibconf.dfa	2013-04-25 08:24:45.000000000 -0400
-+++ libpng-1.6.2/scripts/pnglibconf.dfa.patched	2014-04-25 22:28:34.273329264 -0400
+	echo "\t...downloading libpng ${LIBPNG16VERSION}"
+	wget -q --show-progress ${LIBPNG16URL}
+	if [ $? != 0 ]; then
+		echo "\t...error downloading libpng ${LIBPNG16VERSION}, we can not continue; please check if you have internet access and try again" >&2
+		exit ${EXIT_FAILURE}
+	fi
+	echo "--- libpng-${LIBPNG16VERSION}/scripts/pnglibconf.dfa	2013-04-25 08:24:45.000000000 -0400
++++ libpng-${LIBPNG16VERSION}/scripts/pnglibconf.dfa.patched	2014-04-25 22:28:34.273329264 -0400
 @@ -232,7 +232,7 @@
  # The TEXT values are the defaults when writing compressed text (all forms)
  #
@@ -338,10 +352,14 @@ if [ "${LIBPNGFIX}" = "true" ]; then
 +#@#  include <zlib.h>
  
  # The '@' here means to substitute the value when pnglibconf.h is built
- setting Z_DEFAULT_COMPRESSION default @Z_DEFAULT_COMPRESSION" > stata-png.patch
+ setting Z_DEFAULT_COMPRESSION default @Z_DEFAULT_COMPRESSION" > stata-png16.patch
 	echo "\t...unpacking zlib"
-	tar zxf zlib-1.2.3.tar.gz
-	cd zlib-1.2.3
+	tar zxf zlib-${ZLIB12VERSION}.tar.gz
+	if [ $? != 0 ]; then
+		echo "\t...error unpacking zlib ${ZLIB12VERSION}, we can not continue" >&2
+		exit ${EXIT_FAILURE}
+	fi
+	cd zlib-${ZLIB12VERSION}
 	echo "\t...compiling zlib"
 	export CFLAGS="-fPIC"
 	./configure --prefix=${INSTALLPATH}/libpngworkaround >/dev/null 2>&1
@@ -361,34 +379,65 @@ if [ "${LIBPNGFIX}" = "true" ]; then
 		exit ${EXIT_FAILURE}
 	fi
 	cd ${BUILDDIR}
-	echo "\t...unpacking libpng"
-	tar xzf libpng-1.6.2.tar.gz
-	cd libpng-1.6.2
-	echo "\t...compiling libpng"
+	echo "\t...unpacking libpng ${LIBPNG12VERSION}"
+	tar xzf libpng-${LIBPNG12VERSION}.tar.gz
+	if [ $? != 0 ]; then
+		echo "\t...error unpacking libpng ${LIBPNG12VERSION}, we can not continue" >&2
+		exit ${EXIT_FAILURE}
+	fi
+	cd libpng-${LIBPNG12VERSION}
+	echo "\t...compiling libpng ${LIBPNG12VERSION}"
 	export CFLAGS="-I${INSTALLPATH}/libpngworkaround/include -fPIC"
 	export LDFLAGS="-L${INSTALLPATH}/libpngworkaround/lib"
 	./configure --prefix=${INSTALLPATH}/libpngworkaround >/dev/null 2>&1
 	if [ $? != 0 ]; then
-		echo "\t...error configuring libpng, we can not continue" >&2
+		echo "\t...error configuring libpng ${LIBPNG12VERSION}, we can not continue" >&2
 		exit ${EXIT_FAILURE}
 	fi
-	patch -p1 < ../stata-png.patch >/dev/null 2>&1
 	make -s >/dev/null 2>&1
 	if [ $? != 0 ]; then
-		echo "\t...error making libpng, we can not continue" >&2
+		echo "\t...error making libpng ${LIBPNG12VERSION}, we can not continue; is please check if your distribution's package 'zlib1g-dev' is installed, and try again" >&2
 		exit ${EXIT_FAILURE}
 	fi
-	echo "\t...installing libpng to ${INSTALLPATH}/libpngworkaround/lib"
+	echo "\t...installing libpng ${LIBPNG12VERSION} to ${INSTALLPATH}/libpngworkaround/lib"
 	make -s install >/dev/null 2>&1
 	if [ $? != 0 ]; then
-		echo "\t...error installing libpng, we can not continue" >&2
+		echo "\t...error installing libpng ${LIBPNG12VERSION}, we can not continue" >&2
 		exit ${EXIT_FAILURE}
 	fi
-	WINDOWEDINSTALLPATH="/usr/bin/env LD_LIBRARY_PATH=${INSTALLPATH}/libpngworkaround/lib\:${INSTALLPATH}/libpngworkaround/lib64 ${INSTALLPATH}"
+	cd ${BUILDDIR}
+	echo "\t...unpacking libpng ${LIBPNG16VERSION}"
+	tar xzf libpng-${LIBPNG16VERSION}.tar.gz
+	if [ $? != 0 ]; then
+		echo "\t...error unpacking libpng ${LIBPNG16VERSION}, we can not continue" >&2
+		exit ${EXIT_FAILURE}
+	fi
+	cd libpng-${LIBPNG16VERSION}
+	echo "\t...compiling libpng ${LIBPNG16VERSION}"
+	export CFLAGS="-I${INSTALLPATH}/libpngworkaround/include -fPIC"
+	export LDFLAGS="-L${INSTALLPATH}/libpngworkaround/lib"
+	./configure --prefix=${INSTALLPATH}/libpngworkaround >/dev/null 2>&1
+	if [ $? != 0 ]; then
+		echo "\t...error configuring libpng ${LIBPNG16VERSION}, we can not continue" >&2
+		exit ${EXIT_FAILURE}
+	fi
+	patch -p1 < ../stata-png16.patch >/dev/null 2>&1
+	make -s >/dev/null 2>&1
+	if [ $? != 0 ]; then
+		echo "\t...error making libpng ${LIBPNG16VERSION}, we can not continue" >&2
+		exit ${EXIT_FAILURE}
+	fi
+	echo "\t...installing libpng ${LIBPNG16VERSION} to ${INSTALLPATH}/libpngworkaround/lib"
+	make -s install >/dev/null 2>&1
+	if [ $? != 0 ]; then
+		echo "\t...error installing libpng ${LIBPNG16VERSION}, we can not continue" >&2
+		exit ${EXIT_FAILURE}
+	fi
+	INSTALLPATHWITHLIBS="/usr/bin/env LD_LIBRARY_PATH=${INSTALLPATH}/libpngworkaround/lib\:${INSTALLPATH}/libpngworkaround/lib64 ${INSTALLPATH}"
 	cd "${CWD}"
 	echo "...finished applying workaround for PNG icons not showing up correctly in Stata GUI"
 else
-	WINDOWEDINSTALLPATH="${INSTALLPATH}"
+	INSTALLPATHWITHLIBS="${INSTALLPATH}"
 fi
 ## run icon and mimetype install loop
 echo "\ninstalling mimetypes and icons to system..."
@@ -418,13 +467,13 @@ sed \
 	-e "s:!!FLAVOUR!!:${FLAVOUR}:" \
 	-e "s:!!VERSION!!:${VERSION}:" \
 	-e "s:!!CONSOLE!!:${CONSOLE}:" \
-	-e "s:!!INSTALLPATH!!:${INSTALLPATH}:" \
+	-e "s:!!INSTALLPATH!!:${INSTALLPATHWITHLIBS}:" \
 	<"${PAYLOADPATH}/shortcuts/stata-stata_console.desktop" >"${PAYLOADPATH}/stata-stata${VERSION}_console.desktop"
 sed \
 	-e "s:!!FLAVOUR!!:${FLAVOUR}:" \
 	-e "s:!!VERSION!!:${VERSION}:" \
 	-e "s:!!WINDOWED!!:${WINDOWED}:" \
-	-e "s:!!INSTALLPATH!!:${WINDOWEDINSTALLPATH}:" \
+	-e "s:!!INSTALLPATH!!:${INSTALLPATHWITHLIBS}:" \
 	<"${PAYLOADPATH}/shortcuts/stata-stata_windowed.desktop" >"${PAYLOADPATH}/stata-stata${VERSION}_windowed.desktop"
 xdg-desktop-menu install --noupdate --mode system "${PAYLOADPATH}/stata-stata${VERSION}_windowed.desktop"
 xdg-desktop-menu install --noupdate --mode system "${PAYLOADPATH}/stata-stata${VERSION}_console.desktop"
