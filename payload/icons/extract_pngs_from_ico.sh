@@ -8,7 +8,8 @@ EXIT_ABORT=2 # script exit upon user request
 EXIT_USAGE=64 # wrong syntax
 EXIT_FAILURE=3 # program error
 for SUBDIR in */ ; do
-	rm ${SUBDIR}png/*.png
+	mkdir -p ${SUBDIR}png/
+	rm -f ${SUBDIR}png/*.png
 	for ICOFILE in ${SUBDIR}ico/*.ico ; do
 		icotool -x -o ${SUBDIR}png/ "${ICOFILE}"
 	done
