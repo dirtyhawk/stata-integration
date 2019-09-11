@@ -27,7 +27,7 @@ ZLIB12VERSION="1.2.3"
 ZLIB12URL="https://downloads.sourceforge.net/project/libpng/zlib/${ZLIB12VERSION}/zlib-${ZLIB12VERSION}.tar.gz"
 # MINIMUM AND MAXIMUM OF SUPPORTED STATA VERSIONS
 MINSUPPORTEDVERSION=11
-MAXSUPPORTEDVERSION=15
+MAXSUPPORTEDVERSION=16
 ## Checking for root privileges
 if [ $(id -u) != "0" ]; then
         echo "\nERROR!\nYou need root-privileges to run this script!\nTry running 'sudo $SCRIPTNAME'.\nExiting '$SCRIPTNAME'." >&2
@@ -204,7 +204,7 @@ else
 fi
 ## query whether to apply the libpng/zlib to manually use older versions of the two named libraries
 if [ -z "${ARGLIBPNGFIX}" ] ; then
-	echo "\n(4) Stata relies on libpng versions ${LIBPNG12VERSION} and ${LIBPNG16VERSION} as well as zlib version ${ZLIB12VERSION}. Modern Linux distributions feature newer versions of these libraries.\nThis leads to Stata not being able to display icons in its menu bars, but showing icons with question marks everywhere in the graphical user interface.\nYou should now have a look at your Stata installation; if you see normal icons in Stata's user interface, you're fine. If not, this script can try to work around this issue by\n\t(a) manually auto-downloading the old library variants,\n\t(b) building these libraries from source, and\n\t(c) telling Stata explicitly to use these manually saved variants instead of the system libraries.\n\nThis will erase the directory '${INSTALLPATH}/libpngworkaround/' and all its contents, if existing, without further notice.\n\nPlease specify whether you want the script to implement this workaround:"
+	echo "\n(4) Stata 15 or older relies on libpng versions ${LIBPNG12VERSION} and ${LIBPNG16VERSION} as well as zlib version ${ZLIB12VERSION}. Modern Linux distributions feature newer versions of these libraries.\nThis leads to Stata not being able to display icons in its menu bars, but showing icons with question marks everywhere in the graphical user interface.\nYou should now have a look at your Stata installation; if you see normal icons in Stata's user interface, you're fine. If not, this script can try to work around this issue by\n\t(a) manually auto-downloading the old library variants,\n\t(b) building these libraries from source, and\n\t(c) telling Stata explicitly to use these manually saved variants instead of the system libraries.\n\nThis will erase the directory '${INSTALLPATH}/libpngworkaround/' and all its contents, if existing, without further notice.\n\nRemember that this os not required (and would have no effect at all) in Stata 16 or younger.\n\nPlease specify whether you want the script to implement this workaround:"
 	read QUERIEDLIBPNGFIX
 	echo "\n"
 	case ${QUERIEDLIBPNGFIX} in
