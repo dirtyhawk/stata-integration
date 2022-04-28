@@ -27,7 +27,7 @@ ZLIB12VERSION="1.2.3"
 ZLIB12URL="https://downloads.sourceforge.net/project/libpng/zlib/${ZLIB12VERSION}/zlib-${ZLIB12VERSION}.tar.gz"
 # MINIMUM AND MAXIMUM OF SUPPORTED STATA VERSIONS
 MINSUPPORTEDVERSION=11
-MAXSUPPORTEDVERSION=16
+MAXSUPPORTEDVERSION=17
 ## Checking for root privileges
 if [ $(id -u) != "0" ]; then
         echo "\nERROR!\nYou need root-privileges to run this script!\nTry running 'sudo $SCRIPTNAME'.\nExiting '$SCRIPTNAME'." >&2
