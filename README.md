@@ -11,11 +11,13 @@ The script will do the following:
 1. install Stata icons for the application menu entry as well as each mimetype in several sizes;
 1. make Stata the default application for opening the newly installed mimetypes for each user requested
 
-Use at your own risk. The script has been tested on Ubuntu (16.04 through 20.10) and should work in all modern Linux desktop environments that support the [freedesktop.org](https://www.freedesktop.org) specifications on [icons](https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html), [application shortcuts](https://specifications.freedesktop.org/desktop-entry-spec/latest/) and [mimetypes](https://www.freedesktop.org/wiki/Specifications/shared-mime-info-spec/). I, however, do no not warrant this. Actually, I do not even warrant that the script works at all. That's *your own risk*.
+Use at your own risk. The script has been tested on Ubuntu (16.04 through 23.10), and on Fedora Workstation 39. It should work in all modern Linux desktop environments that support the [freedesktop.org](https://www.freedesktop.org) specifications on [icons](https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html), [application shortcuts](https://specifications.freedesktop.org/desktop-entry-spec/latest/) and [mimetypes](https://www.freedesktop.org/wiki/Specifications/shared-mime-info-spec/). I, however, do no not warrant this. Actually, I do not even warrant that the script works at all. That's *your own risk*.
 
-03/25/2024: Tested for Stata MP 18 on Fedora Workstation 39.
 ## Usage
 Simply run `sudo stata-integration.bin` in a terminal window and **read** and follow the on-screen instructions.
+
+## Contributions
+Many thanks to the contribution by @pedromezaq, who added the necessary resources for Stata 18. If anyone else is willing to contribute, reach out by starting an issue and / or pull request like he did! 
 
 ## Copyright notice
 All icons have been extracted from the official Stata for Windows binaries and are, as well as the term 'Stata', of course copyrighted property of StataCorp LLC.
