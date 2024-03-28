@@ -1,2 +1,2 @@
 payload/icons/* linguist-vendored
-
+*.bin filter=lfs diff=lfs merge=lfs -text
