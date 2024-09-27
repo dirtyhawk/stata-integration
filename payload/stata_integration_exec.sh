@@ -17,6 +17,8 @@ PAYLOADPATH=$(cd "$(dirname "$0")" || exit; pwd)
 DEFAULTPATH='/usr/local/stata'
 # DEFAULT MODE OR USER INSTALLATION MODE
 DEFAULTMODE='user'
+# DEFAULT ANSWER TO SPLASH SCREEN REMOVAL QUESTION
+DEFAULTKILLSPLASH=no
 # EXACT VERSION NUMBER FOR LIBPNG 1.6
 LIBPNG16VERSION="1.6.2"
 # DOWNLOAD URL FOR LIBPNG 1.6
@@ -40,7 +42,7 @@ if is_root; then
         exit "${EXIT_ERROR}"
 fi
 # parse arguments
-TEMP=$(getopt --options v:f:p:l:m:u:c: --longoptions version:,flavour:,path:,libpngfix:,mode:,users:,caller: -n "${SCRIPTNAME}" -- "$@")
+TEMP=$(getopt --options v:f:p:l:m:u:k:c: --longoptions version:,flavour:,path:,libpngfix:,mode:,users:,killsplash:,caller: -n "${SCRIPTNAME}" -- "$@")
 # shellcheck disable=SC2181
 if [ "$?" -ne 0 ];
 then
@@ -79,6 +81,11 @@ while true ; do
 			ARGUSERS="$1";
 			shift;
 		;;
+		-k|--killsplash)
+			shift;
+			ARGKILLSPLASH="$1";
+			shift;
+		;;
 		-c|--caller)
 			shift;
 			CALLER="$1";
@@ -91,7 +98,7 @@ while true ; do
 	esac
 done
 ## make clear what this script will do
-status_msg "$(printf "For this script to run, you must have Stata already installed in your system;\n\tthis script will install icons and mimetypes for all Stata file types to your system,\n\tand add entries for Stata (console and windowed version) in your application menu -- not more, not less!\n\n\tIn order to do this, this script will ask you to provide the following information about your Stata environment:\n\t(1) The Stata flavour of your installation ('BE', 'small', 'IC', 'SE', or 'MP');\n\t(2) the version number of your Stata installation (integer number from '%s' through '%s');\n\t(3) the exact and full installation path to your Stata installation (most likely '/usr/local/stata', if you did not change the default);\n\t(4) whether to install file type associations and icons for the current user only, or system-wide;\n\t(5) the user name(s) of all users to create filetype associations for;\n\t(6) if you want to install a workaround for using old variants of libpng and zlib, in case you attempt to use Stata 15 or older.\n\nAll icons have been extracted from the official Stata for Windows binaries and are, as well as the term 'Stata', of course copyrighted property of StataCorp LLC.\n" "${MINSUPPORTEDVERSION}" "${MAXSUPPORTEDVERSION}")"
+status_msg "$(printf "For this script to run, you must have Stata already installed in your system;\n\tthis script will install icons and mimetypes for all Stata file types to your system,\n\tand add entries for Stata (console and windowed version) in your application menu – not more, not less!\n\n\tIn order to do this, this script will ask you to provide the following information about your Stata environment:\n\t(1) The Stata flavour of your installation ('BE', 'small', 'IC', 'SE', or 'MP');\n\t(2) the version number of your Stata installation (integer number from '%s' through '%s');\n\t(3) the exact and full installation path to your Stata installation (most likely '/usr/local/stata', if you did not change the default);\n\t(4) whether to install file type associations and icons for the current user only, or system-wide;\n\t(5) the user name(s) of all users to create filetype associations for;\n\t(6) if you want Stata's default splash removed;\n\t(7) if you want to install a workaround for using old variants of libpng and zlib, in case you attempt to use Stata 15 or older.\n\nAll icons have been extracted from the official Stata for Windows binaries and are, as well as the term 'Stata', of course copyrighted property of StataCorp LLC.\n" "${MINSUPPORTEDVERSION}" "${MAXSUPPORTEDVERSION}")"
 while true; do
 	prompt_msg "$(printf 'Did you read an understand the above?')"
 	read -r UNDERSTOOD
@@ -259,10 +266,49 @@ else
 	TARGETUSERS="${ARGUSERS}"
 	status_msg "$(printf "You already answered (5) via command line: \e[1m--users %s\e[0m" "${ARGUSERS}")"
 fi
+## query whether to remove Stata's startup splash screen
+if [ -z "${ARGKILLSPLASH}" ] ; then
+		prompt_msg "$(printf "(6) Please specify if we should remove the default Stata splash screen that appears in the output window on startup [%s]:" "${DEFAULTKILLSPLASH}")"
+		read -r QUERIEDKILLSPLASH
+		case ${QUERIEDKILLSPLASH} in
+			"" )
+				KILLSPLASH=${DEFAULTKILLSPLASH}
+			;;
+			[Yy]|[Yy][Ee]|[Yy][Ee][Ss]|[Tt][Rr][Uu][Ee] )
+				KILLSPLASH=true
+			;;
+			[Nn]|[Nn][Oo]|[Ff][Aa][Ll][Ss][Ee] )
+				KILLSPLASH=false
+			;;
+			* )
+				error_msg "$(printf 'Sorry, this script is not meant for you.')"
+				exit ${EXIT_ERROR}
+			;;
+		esac
+else
+	case ${ARGKILLSPLASH} in
+		[Yy]|[Yy][Ee]|[Yy][Ee][Ss]|[Tt][Rr][Uu][Ee] )
+			KILLSPLASH=true
+		;;
+		[Nn]|[Nn][Oo]|[Ff][Aa][Ll][Ss][Ee] )
+			KILLSPLASH=false
+		;;
+		* )
+			error_msg "$(printf 'Invalid argument for option \e[1m--killsplash\e[0m: \e[1m%s\e[0m' "${ARGKILLSPLASH}")"
+			exit ${EXIT_ERROR}
+		;;
+	esac
+	status_msg "$(printf "You already answered (6) via command line: \e[1m--killsplash %s\e[0m" "${ARGKILLSPLASH}")"
+fi
+if [ "${KILLSPLASH}" = true ]; then
+	QARGUMENT=-q
+else
+	QARGUMENT=""
+fi
 ## query whether to apply the libpng/zlib to manually use older versions of the two named libraries
 if [ -z "${ARGLIBPNGFIX}" ] ; then
 	if [ "${VERSION}" -le "15" ]; then
-		prompt_msg "$(printf "(6) Stata 15 or older relies on libpng versions %s and %s as well as zlib version %s.\n\tModern Linux distributions feature newer versions of these libraries.\n\tThis leads to Stata not being able to display icons in its menu bars,\n\tbut showing icons with question marks everywhere in the graphical user interface.\n\n\tYou should now have a look at your Stata installation; if you see normal icons in Stata's graphical user interface, you're fine.\n\tIf not, this script can try to work around this issue by\n\t\t(a) manually auto-downloading the old library variants,\n\t\t(b) building these libraries from source, and\n\t\t(c) telling Stata explicitly to use these manually saved variants instead of the system libraries.\n\n\tThis will erase the directory '%s/libpngworkaround/' and all its contents, if existing, without further notice.\n\n\tRemember that this is not required (and would have no effect at all) in Stata 16 or younger.\n\n\tPlease specify whether you want the script to implement this workaround:" "${LIBPNG12VERSION}" "${LIBPNG16VERSION}" "${ZLIB12VERSION}" "${INSTALLPATH}")"
+		prompt_msg "$(printf "(7) Stata 15 or older relies on libpng versions %s and %s as well as zlib version %s.\n\tModern Linux distributions feature newer versions of these libraries.\n\tThis leads to Stata not being able to display icons in its menu bars,\n\tbut showing icons with question marks everywhere in the graphical user interface.\n\n\tYou should now have a look at your Stata installation; if you see normal icons in Stata's graphical user interface, you're fine.\n\tIf not, this script can try to work around this issue by\n\t\t(a) manually auto-downloading the old library variants,\n\t\t(b) building these libraries from source, and\n\t\t(c) telling Stata explicitly to use these manually saved variants instead of the system libraries.\n\n\tThis will erase the directory '%s/libpngworkaround/' and all its contents, if existing, without further notice.\n\n\tRemember that this is not required (and would have no effect at all) in Stata 16 or younger.\n\n\tPlease specify whether you want the script to implement this workaround:" "${LIBPNG12VERSION}" "${LIBPNG16VERSION}" "${ZLIB12VERSION}" "${INSTALLPATH}")"
 		read -r QUERIEDLIBPNGFIX
 		case ${QUERIEDLIBPNGFIX} in
 			[Yy]|[Yy][Ee]|[Yy][Ee][Ss]|[Tt][Rr][Uu][Ee] )
@@ -292,7 +338,7 @@ else
 			exit ${EXIT_ERROR}
 		;;
 	esac
-	status_msg "$(printf "You already answered (6) via command line: \e[1m--libpngfix %s\e[0m" "${ARGLIBPNGFIX}")"
+	status_msg "$(printf "You already answered (7) via command line: \e[1m--libpngfix %s\e[0m" "${ARGLIBPNGFIX}")"
 fi
 ## check if given installation directory is valid
 if [ ! -d "${INSTALLPATH}" ]; then
@@ -339,7 +385,7 @@ if [ ! -d "${PAYLOADPATH}/icons/${VERSION}" ]; then
 fi
 ICONPATH="${PAYLOADPATH}/icons/${ICONVERSION}"
 ## output command line for later referral
-status_msg "$(printf 'Everything you entered seems to be fine;\n\tyou can use the same configuration parameters again via command line using the following invocation:\n\n\t\e[1m%s --version %s --flavour %s --libpngfix %s --path "%s" --mode %s --users "%s"\e[0m' "${CALLER}" "${VERSION}" "${SHORTFLAVOUR}" "${LIBPNGFIX}" "${INSTALLPATH}" "${MODE}" "${TARGETUSERS}")"
+status_msg "$(printf 'Everything you entered seems to be fine;\n\tyou can use the same configuration parameters again via command line using the following invocation:\n\n\t\e[1m%s --version %s --flavour %s --libpngfix %s --path "%s" --mode %s --users "%s" --killsplash %s\e[0m' "${CALLER}" "${VERSION}" "${SHORTFLAVOUR}" "${LIBPNGFIX}" "${INSTALLPATH}" "${MODE}" "${TARGETUSERS}" "${KILLSPLASH}")"
 while true; do
 	prompt_msg "$(printf "Shall we begin the installation task?")"
 	read -r LETSRIDE
@@ -533,12 +579,14 @@ sed \
 	-e "s:!!FLAVOUR!!:${FLAVOUR}:" \
 	-e "s:!!VERSION!!:${VERSION}:" \
 	-e "s:!!CONSOLE!!:${CONSOLE}:" \
+	-e "s:!!QARGUMENT!!:${QARGUMENT}:" \
 	-e "s:!!INSTALLPATH!!:${INSTALLPATHWITHLIBS}:" \
 	<"${PAYLOADPATH}/shortcuts/stata-stata_console.desktop" >"${PAYLOADPATH}/stata-stata${VERSION}_console.desktop"
 sed \
 	-e "s:!!FLAVOUR!!:${FLAVOUR}:" \
 	-e "s:!!VERSION!!:${VERSION}:" \
 	-e "s:!!WINDOWED!!:${WINDOWED}:" \
+	-e "s:!!QARGUMENT!!:${QARGUMENT}:" \
 	-e "s:!!INSTALLPATH!!:${INSTALLPATHWITHLIBS}:" \
 	<"${PAYLOADPATH}/shortcuts/stata-stata_windowed.desktop" >"${PAYLOADPATH}/stata-stata${VERSION}_windowed.desktop"
 exec_depending_on_mode  xdg-desktop-menu install --noupdate --mode "${MODE}" "${PAYLOADPATH}/stata-stata${VERSION}_windowed.desktop"
@@ -580,6 +628,6 @@ fi
 exec_depending_on_mode update-desktop-database "${APPLICATIONSDIR}"
 status_msg "$(printf '...finished refreshing application shortcuts database')"
 # return command line parameters for repeating this, and exit
-status_msg "$(printf 'Everything has finished; you can repeat this process via command line using the following invocation:\n\n\t\e[1m%s --version %s --flavour %s --libpngfix %s --path "%s" --mode %s --users "%s"\e[0m' "${CALLER}" "${VERSION}" "${SHORTFLAVOUR}" "${LIBPNGFIX}" "${INSTALLPATH}" "${MODE}" "${TARGETUSERS}")"
+status_msg "$(printf 'Everything has finished; you can repeat this process via command line using the following invocation:\n\n\t\e[1m%s --version %s --flavour %s --libpngfix %s --path "%s" --mode %s --users "%s" --killsplash %s\e[0m' "${CALLER}" "${VERSION}" "${SHORTFLAVOUR}" "${LIBPNGFIX}" "${INSTALLPATH}" "${MODE}" "${TARGETUSERS}" "${KILLSPLASH}")"
 exit ${EXIT_SUCCESS}
 # EOF
