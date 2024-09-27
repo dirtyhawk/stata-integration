@@ -8,7 +8,7 @@ cd ..
 if [ -e "payload.tar" ]; then
     gzip payload.tar
     if [ -e "payload.tar.gz" ]; then
-        cat "decompress.sh" "payload.tar.gz" > "build/stata-integration.bin"
+        cat "${PARENTDIR}/payload/functions.sh" "decompress.sh" "payload.tar.gz" > "build/stata-integration.bin"
 	chmod u+x "build/stata-integration.bin"
     else
         echo "payload.tar.gz does not exist"
