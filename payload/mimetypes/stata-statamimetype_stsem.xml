@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
   <mime-type type="application/x-stata-stsem">
-		<comment>Stata SEM file</comment>
-		<comment xml:lang="de">Stata SEM-Datei</comment>
+		<comment>Stata SEM Path Diagram</comment>
+		<comment xml:lang="de">Stata SEM-Pfaddiagramm</comment>
 		<glob pattern="*.stsem"/>
 		<icon name="application-x-stata-stsem"/>
   </mime-type>
