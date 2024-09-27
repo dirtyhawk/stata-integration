@@ -18,7 +18,7 @@ Use at your own risk. The script has been tested on Ubuntu (16.04 through 24.04)
 
 ## Usage
 
-Simply run `sudo stata-integration.bin` in a terminal window and **read** and follow the on-screen instructions.
+Simply run `stata-integration.bin` in a terminal window and **read** and follow the on-screen instructions.
 
 ## Contributions
 
