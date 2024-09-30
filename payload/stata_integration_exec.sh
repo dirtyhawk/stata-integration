@@ -1,7 +1,7 @@
 #! /bin/sh
 # shellcheck enable=require-variable-braces
 # This script installs Stata icons as mimetype icons, as well as the Stata
-# mimetypes for .gph, .stsem, .dta, .do, .stpr, .sthlp and .smcl files,
+# mimetypes for .gph, .stsem, .dta, .dtas, .do, .stpr, .sthlp and .smcl files,
 # into the system 
 SCRIPTNAME=$(basename "$0")
 CALLER="${SCRIPTNAME}"
